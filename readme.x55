@@ -1,0 +1,48 @@
+# directories:
+# - /compile/doc/stable-x55 - the files in this dir
+# - /compile/source/linux-stable-x55 - the kernel sources checked out from gitrepo
+# - /compile/result/stable-x55 - the resulting kernel, modules etc. tar.gz files
+# name: stb-x55
+
+# info: based on warpme minimyth2 patches from https://github.com/warpme/minimyth2
+#       at commit 67c1dec6e93743c8f4de1d5299d06f4036a8ea2b (linux-6.6 subdir)
+
+cd /compile/source/linux-stable-x55
+
+# patches:
+#wifi patch https://gitlab.postmarketos.org/postmarketOS/pmaports/-/blob/master/device/testing/linux-powkiddy-x55/rtw88_wifi_fix.patch?ref_type=heads
+patch -p1 < /compile/doc/stable-x55/misc.x55/patches/rtw88_wifi_fix.patch
+# + instead of -dirty
+patch -p1 < /compile/doc/stable-x55/misc.x55/patches/dirty-to-+.patch
+
+export ARCH=arm64
+export LOCALVERSION="-stb-x55"
+
+scripts/kconfig/merge_config.sh -m arch/arm64/configs/defconfig /compile/doc/stable-x55/misc.x55/options/*.cfg
+make ARCH=arm64 olddefconfig
+
+make ARCH=arm64 Image modules dtbs -j$(nproc)
+
+export kver=`make kernelrelease`
+echo $kver
+
+make ARCH=arm64 modules_install dtbs_install
+
+cp -v .config /boot/config-${kver}
+cp -v arch/arm64/boot/Image /boot/Image-${kver}
+
+# this is build for this specyfic device
+cp -v arch/arm64/boot/dts/rockchip/rk3566-powkiddy-x55.dtb /boot/
+
+cp -v System.map /boot/System.map-${kver}
+
+
+cd /boot
+#make sure you run it on x55
+#update-initramfs -c -k ${kver}
+
+tar cvzf /compile/source/linux-stable-x55/${kver}.tar.gz /boot/*-${kver} /boot/rk3566-powkiddy-x55.dtb /lib/modules/${kver}
+cp -v /compile/doc/stable-x55/config.x55 /compile/doc/stable-x55/config.x55.old
+cp -v /compile/source/linux-stable-x55/.config /compile/doc/stable-x55/config.x55
+cp -v /compile/source/linux-stable-x55/.config /compile/doc/stable-x55/config.x55-${kver}
+cp -v /compile/source/linux-stable-x55/*.tar.gz /compile/result/stable-x55
