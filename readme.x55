@@ -43,3 +43,15 @@ cp -v /compile/doc/stable-x55/config.x55 /compile/doc/stable-x55/config.x55.old
 cp -v /compile/source/linux-stable-x55/.config /compile/doc/stable-x55/config.x55
 cp -v /compile/source/linux-stable-x55/.config /compile/doc/stable-x55/config.x55-${kver}
 cp -v /compile/source/linux-stable-x55/*.tar.gz /compile/result/stable-x55
+
+# additions overlays for undervolting
+# extends battery life
+cd /compile/source/linux-stable-x55
+
+for dts in /compile/doc/stable-x55/misc.x55/overlays/*.dts; do
+    scripts/dtc/dtc -@ -I dts -O dtb -o ${dts%.dts}.dtbo ${dts}
+done
+
+mv -v /compile/doc/stable-x55/misc.x55/overlays/*.dtbo /compile/result/stable-x55
+
+cd /compile/result/stable-x55
