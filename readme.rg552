@@ -37,7 +37,7 @@ cd /boot
 #make sure you run it on rg552 or in chroot
 #update-initramfs -c -k ${kver}
 
-tar cvzf /compile/source/linux-stable-rg552/${kver}.tar.gz /boot/*-${kver} /boot/rk3566-powkiddy-x55.dtb /lib/modules/${kver}
+tar cvzf /compile/source/linux-stable-rg552/${kver}.tar.gz /boot/*-${kver} /boot/rk3399-anbernic-rg552.dtb /lib/modules/${kver}
 cp -v /compile/doc/stable-rg552/config.rg552 /compile/doc/stable-rg552/config.rg552.old
 cp -v /compile/source/linux-stable-rg552/.config /compile/doc/stable-rg552/config.rg552
 cp -v /compile/source/linux-stable-rg552/.config /compile/doc/stable-rg552/config.rg552-${kver}
