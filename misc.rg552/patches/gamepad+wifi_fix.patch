@@ -1,0 +1,181 @@
+--- linux.orig/arch/arm64/boot/dts/rockchip/rk3399-anbernic-rg552.dts	2024-12-18 07:44:45.760149456 +0100
++++ linux/arch/arm64/boot/dts/rockchip/rk3399-anbernic-rg552.dts	2024-12-18 07:43:52.404339308 +0100
+@@ -90,78 +90,79 @@
+ 		};
+ 	};
+ 
+-	joypad: rocknix-singleadc-joypad {
+-		compatible = "rocknix-singleadc-joypad";
+-
+-		pwms = <&pwm3 0 200000000 0>;
+-		pwm-names = "enable";
+-		rumble-boost-weak = <0x0000>;
+-		rumble-boost-strong = <0x0000>;
+-
+-		joypad-name = "rg552_joypad";
+-		joypad-vendor = <0x484B>;
+-		joypad-product = <0x1101>;
+-		joypad-revision = <0x0234>;
++	/*gamepad*/
+ 
++	gpio_mux: mux-controller {
+ 		status = "okay";
++		compatible = "gpio-mux";
++		#mux-control-cells = <0>;
+ 
+-		/* gpio pincontrol setup */
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&btn_pins>;
++		mux-gpios = <&gpio1 RK_PA1 GPIO_ACTIVE_LOW>,
++			    <&gpio1 RK_PA0 GPIO_ACTIVE_LOW>;
++		/*mux-en-gpio = <&gpio1 RK_PA4 GPIO_ACTIVE_LOW>; // FIXME: unused in driver*/
++	};
+ 
+-		/* Analog mux define */
+-		io-channel-names = "amux_adc";
++	adc_mux: adc-mux {
++		status = "okay";
++		compatible = "io-channel-mux";
+ 		io-channels = <&saradc 4>;
++		io-channel-names = "parent";
++		#io-channel-cells = <1>;
+ 
+-		/* adc mux channel count */
+-		amux-count = <4>;
+-		/* adc mux select(a,b) gpio */
+-		amux-a-gpios = <&gpio1 RK_PA1 GPIO_ACTIVE_LOW>;
+-		amux-b-gpios = <&gpio1 RK_PA0 GPIO_ACTIVE_LOW>;
+-		/* adc mux enable gpio */
+-		amux-en-gpios = <&gpio1 RK_PA4 GPIO_ACTIVE_LOW>;
+-
+-		/* adc calculate scale */
+-		button-adc-scale = <2>;
++		mux-controls = <&gpio_mux>;
+ 
+-		/* adc deadzone range  */
+-		button-adc-deadzone = <64>;
++		channels = "0", "1", "2", "3";
++		settle-time-us = <100>;
++	};
+ 
+-		/*
+-		  specifies fuzz value that is used to filter noise from
+-		  the event stream.
+-		*/
+-		button-adc-fuzz = <32>;
+-		button-adc-flat = <32>;
++	adc-joystick {
++		compatible = "adc-joystick";
++		io-channels = <&adc_mux 0>,
++			      <&adc_mux 1>,
++			      <&adc_mux 2>,
++			      <&adc_mux 3>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		poll-interval = <60>;
++		
++		axis@0 {
++			reg = <0>;
++			abs-flat = <32>;
++			abs-fuzz = <16>;
++			abs-range = <1024 0>;
++			linux,code = <ABS_X>;
++		};
++
++		axis@1 {
++			reg = <1>;
++			abs-flat = <32>;
++			abs-fuzz = <16>;
++			abs-range = <0 1024>;
++			linux,code = <ABS_RX>;
++		};
++
++		axis@2 {
++			reg = <2>;
++			abs-flat = <32>;
++			abs-fuzz = <16>;
++			abs-range = <1024 0>;
++			linux,code = <ABS_Y>;
++		};
++
++		axis@3 {
++			reg = <3>;
++			abs-flat = <32>;
++			abs-fuzz = <16>;
++			abs-range = <0 1024>;
++			linux,code = <ABS_RY>;
++		};
++	};
+ 
+-		/*
+-		  Analog Stick data tuning value(precent)
+-		  p = positive direction, n = negative direction
+-		  report value = (real_adc_data * tuning_value) / 100
+-		*/
+-		abs_x-p-tuning = <300>;
+-		abs_x-n-tuning = <300>;
+-
+-		abs_y-p-tuning = <300>;
+-		abs_y-n-tuning = <300>;
+-
+-		abs_rx-p-tuning = <300>;
+-		abs_rx-n-tuning = <300>;
+-
+-		abs_ry-p-tuning = <300>;
+-		abs_ry-n-tuning = <300>;
+-
+-		/* poll device interval (ms), adc read interval */
+-		poll-interval = <10>;
+-
+-		/* required for RG552(invert) */
+-		invert-absx;
+-		invert-absy;
++	gamepad {
++		compatible = "gpio-keys";
++		pinctrl-names = "default";
++		pinctrl-0 = <&btn_pins>;
+ 
+-		/* gpio button auto repeat set value : default disable */
+-		/*
+-			autorepeat;
+-		*/
+ 		sw1 {
+ 		        gpios = <&gpio3 RK_PA0 GPIO_ACTIVE_LOW>;
+ 		        label = "GPIO DPAD-UP";
+@@ -249,6 +250,8 @@
+ 		};
+ 	};
+ 
++	/*end gamepad*/
++
+ 	/* Audio components */
+ 	es8316-sound {
+ 		compatible = "simple-audio-card";
+@@ -487,16 +490,24 @@
+ 		regulator-max-microvolt = <5500000>;
+ 		vin-supply = <&vcc5v0_sys>;
+ 	};
++	vcc_wifi: gpio-regulator {
++		compatible = "regulator-gpio";
++
++		regulator-min-microvolt = <0>;
++		regulator-max-microvolt = <5000000>;
++
++		states = <	5000000 0x2
++			  		0 0x1
++			  		5000000 0x0>;
+ 
+-	vcc_wifi: vcc-wifi-regulator {
+-		compatible = "regulator-fixed";
+ 		enable-active-high;
+ 		enable-gpios  = <&gpio3 RK_PC1 GPIO_ACTIVE_HIGH>;
+ 		gpio = <&gpio0 RK_PB5 GPIO_ACTIVE_HIGH>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&wifi_pwr>;
+ 		regulator-name = "wifi_enable";
+-		regulator-always-on;
++
++		// regulator-always-on;
+ 		regulator-boot-on;
+ 	};
+ };
