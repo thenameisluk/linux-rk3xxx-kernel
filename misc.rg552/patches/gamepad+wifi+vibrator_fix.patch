@@ -1,5 +1,5 @@
---- linux.orig/arch/arm64/boot/dts/rockchip/rk3399-anbernic-rg552.dts	2024-12-18 07:44:45.760149456 +0100
-+++ linux/arch/arm64/boot/dts/rockchip/rk3399-anbernic-rg552.dts	2024-12-18 07:43:52.404339308 +0100
+--- linux.orig/arch/arm64/boot/dts/rockchip/rk3399-anbernic-rg552.dts	2024-12-21 21:37:39.811924677 +0100
++++ linux/arch/arm64/boot/dts/rockchip/rk3399-anbernic-rg552.dts	2024-12-21 21:44:32.543387225 +0100
 @@ -90,78 +90,79 @@
  		};
  	};
@@ -142,16 +142,24 @@
  		sw1 {
  		        gpios = <&gpio3 RK_PA0 GPIO_ACTIVE_LOW>;
  		        label = "GPIO DPAD-UP";
-@@ -249,6 +250,8 @@
+@@ -249,6 +250,16 @@
  		};
  	};
  
 +	/*end gamepad*/
 +
++	vibrator {
++			compatible = "pwm-vibrator";
++			pwms = <&pwm3 0 200000000 0>;
++			pwm-names = "enable";
++			//direction-duty-cycle-ns = <500000>;
++			vcc-supply = <&vcc5v0_sys>;
++	};
++
  	/* Audio components */
  	es8316-sound {
  		compatible = "simple-audio-card";
-@@ -487,16 +490,24 @@
+@@ -487,16 +498,24 @@
  		regulator-max-microvolt = <5500000>;
  		vin-supply = <&vcc5v0_sys>;
  	};
@@ -159,11 +167,11 @@
 +		compatible = "regulator-gpio";
 +
 +		regulator-min-microvolt = <0>;
-+		regulator-max-microvolt = <5000000>;
++		regulator-max-microvolt = <3300000>;
 +
-+		states = <	5000000 0x2
++		states = <	3300000 0x2
 +			  		0 0x1
-+			  		5000000 0x0>;
++			  		3300000 0x0>;
  
 -	vcc_wifi: vcc-wifi-regulator {
 -		compatible = "regulator-fixed";
