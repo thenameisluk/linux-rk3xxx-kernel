@@ -2,7 +2,7 @@
 # - /compile/doc/stable-rg552 - the files in this dir
 # - /compile/source/linux-stable-rg552 - the kernel sources checked out from gitrepo
 # - /compile/result/stable-rg552 - the resulting kernel, modules etc. tar.gz files
-# name: stb-rg552+
+# name: stb-rg5+
 
 cd /compile/source/linux-stable-rg552
 
@@ -12,7 +12,7 @@ for i in /compile/doc/stable-rg552/misc.rg552/patches/*.patch; do
 done
 
 export ARCH=arm64
-export LOCALVERSION="-stb-rg552"
+export LOCALVERSION="-stb-rg5"
 
 scripts/kconfig/merge_config.sh -m arch/arm64/configs/defconfig /compile/doc/stable-rg552/misc.rg552/options/*.cfg
 make ARCH=arm64 olddefconfig
@@ -28,7 +28,8 @@ cp -v .config /boot/config-${kver}
 cp -v arch/arm64/boot/Image /boot/Image-${kver}
 
 # this is build for this specyfic device
-cp -v arch/arm64/boot/dts/rockchip/rk3399-anbernic-rg552.dtb /boot/
+mkdir -p /boot/dtb-${kver}
+cp -v arch/arm64/boot/dts/rockchip/rk3399-anbernic-rg552.dtb /boot/dtb-${kver}/
 
 cp -v System.map /boot/System.map-${kver}
 
