@@ -29,7 +29,8 @@ cp -v .config /boot/config-${kver}
 cp -v arch/arm64/boot/Image /boot/Image-${kver}
 
 # this is build for this specyfic device
-cp -v arch/arm64/boot/dts/rockchip/rk3566-powkiddy-x55.dtb /boot/
+mkdir -p /boot/dtb-${kver}
+cp -v arch/arm64/boot/dts/rockchip/rk3566-powkiddy-x55.dtb /boot/dtb-${kver}/
 
 cp -v System.map /boot/System.map-${kver}
 
@@ -38,7 +39,7 @@ cd /boot
 #make sure you run it on x55
 #update-initramfs -c -k ${kver}
 
-tar cvzf /compile/source/linux-stable-x55/${kver}.tar.gz /boot/*-${kver} /boot/rk3566-powkiddy-x55.dtb /lib/modules/${kver}
+tar cvzf /compile/source/linux-stable-x55/${kver}.tar.gz /boot/*-${kver} /lib/modules/${kver}
 cp -v /compile/doc/stable-x55/config.x55 /compile/doc/stable-x55/config.x55.old
 cp -v /compile/source/linux-stable-x55/.config /compile/doc/stable-x55/config.x55
 cp -v /compile/source/linux-stable-x55/.config /compile/doc/stable-x55/config.x55-${kver}
